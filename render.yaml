@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: hyderabad-weather-forecast
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: sh start.sh
