@@ -1,0 +1,57 @@
+name: Daily Model Retraining
+
+on:
+  schedule:
+    # Runs at 2:00 AM IST (8:30 PM UTC)
+    - cron: '30 20 * * *'
+  workflow_dispatch:  # Allows manual trigger
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        pip install pandas numpy scikit-learn xgboost joblib requests open-meteo
+    
+    - name: Fetch new data
+      run: |
+        python src/fetch_data.py
+    
+    - name: Preprocess data
+      run: |
+        python src/preprocess.py
+    
+    - name: Train new model
+      run: |
+        python src/train.py
+    
+    - name: Validate new model
+      run: |
+        python src/validate.py
+    
+    - name: Upload to Hugging Face
+      if: success()
+      env:
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      run: |
+        git clone https://huggingface.co/spaces/${{ secrets.HF_USERNAME }}/hyderabad-weather-forecast
+        cd hyderabad-weather-forecast
+        
+        cp ../models/model_latest.pkl models/
+        cp ../models/scaler.pkl models/
+
+        git config user.email "github-actions@github.com"
+        git config user.name "GitHub Actions"
+        git add models/
+        git commit -m "Auto-update model $(date +'%Y-%m-%d')" || echo "No changes"
+        git push
