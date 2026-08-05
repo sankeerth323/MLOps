@@ -54,4 +54,4 @@ jobs:
         git config user.name "GitHub Actions"
         git add models/
         git commit -m "Auto-update model $(date +'%Y-%m-%d')" || echo "No changes"
-        git push
+        git push https://${{ secrets.HF_TOKEN }}@huggingface.co/spaces/${{ secrets.HF_USERNAME }}/hyderabad-weather-forecast
