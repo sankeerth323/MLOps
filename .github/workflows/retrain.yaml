@@ -44,12 +44,13 @@ jobs:
       env:
         HF_TOKEN: ${{ secrets.HF_TOKEN }}
       run: |
+        echo "Current directory: $(pwd)"
+        echo "Listing files in models/:"
+        ls -la models/
         git clone https://huggingface.co/spaces/${{ secrets.HF_USERNAME }}/hyderabad-weather-forecast
         cd hyderabad-weather-forecast
-        
         cp ../models/model_latest.pkl models/
         cp ../models/scaler.pkl models/
-
         git config user.email "github-actions@github.com"
         git config user.name "GitHub Actions"
         git add models/
